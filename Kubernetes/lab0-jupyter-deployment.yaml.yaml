@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab0-jupyter
+  namespace: mabdurahimov-410796
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      jupyter: lab0
+  template:
+    metadata:
+      labels:
+        jupyter: lab0
+    spec:
+      containers:
+        - name: jupyter
+          image: node03.st:5000/pyspark-hdfs-jupyter:mabdurahimov-410796                   
+          ports:
+            - containerPort: 8282
+          command: ["start-notebook.sh"]  
+          args: ["--NotebookApp.token='<your_password>'", "--NotebookApp.port=8282"]  
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+
+          volumeMounts:
+            - name: config-volume
+              mountPath: /home/jovyan/.jupyter/jupyter_notebook_config.py
+              subPath: "jupyter_notebook_config.py"
+              readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: lab0-jupyter-cm
+            items:
+              - key: "jupyter_notebook_config.py"
+                path: "jupyter_notebook_config.py"
